@@ -2,6 +2,7 @@
 
 namespace TeaDiscord;
 
+use Error;
 use Discord\Discord;
 use Discord\Parts\Guild\Guild;
 use Discord\Voice\VoiceClient;
@@ -65,8 +66,6 @@ final class Response
 			case ShmAct::SELECT_STREAM_CHANNEL:
 				$shm_id = shmop_open(getMKey($guild->id, ShmKeyId::SELECT_STREAM_CHANNEL), "c", 0644, 1000);
 				$read = json_decode(mkread($shm_id, 0, 1000), true);
-				shmop_close($shm_id);
-				var_dump($read);
 				if (is_numeric($text)) {
 					$text = (int) $text;
 					var_dump($text);
@@ -76,9 +75,12 @@ final class Response
 							$read[$text - 1]
 						);
 						$reply = "Channel `{$read[$text - 1]}` has been selected as streaming channel!";
+						shmop_delete($shm_id);
+						shmop_close($shm_id);
 						return true;
 					}
 				}
+				shmop_close($shm_id);
 				break;
 			
 			default:
@@ -142,9 +144,13 @@ shm_delete_no_reply:
 			goto reply;
 		}
 
-
+		// Music
 		if (preg_match("/zcc/", $text, $m)) {
-			(new Music($this->discord, $guild, $channel))->run();
+			try {
+				(new Music($this->discord, $guild, $channel))->run();	
+			} catch (Error $e) {
+				dlog("%s\n", $e->getTraceAsString());
+			}
 			return;
 		}
 
