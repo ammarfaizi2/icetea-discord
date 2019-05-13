@@ -41,7 +41,7 @@ final class TeaDiscord
 						(new Response($discord, $message))->run();
 					} catch (Error $e) {
 						printf("\n\nAn error occured!\n");
-						var_dump($e->getMessage(), $e->getFile(), $e->getLine());		
+						var_dump($e->getMessage(), $e->getFile(), $e->getLine());
 					}
 				});
 			});

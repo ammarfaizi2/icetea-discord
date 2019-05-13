@@ -6,6 +6,10 @@ require __DIR__."/vendor/autoload.php";
 
 $writePid = file_put_contents($cfg["pid_file"], getmypid());
 
+if (!function_exists("\\Sodium\\crypto_secretbox")) {
+	require __DIR__."/src/sodium.php";
+}
+
 if (!$writePid) {
 	print "Couldn't create a pid file!\n";
 	exit(1);
