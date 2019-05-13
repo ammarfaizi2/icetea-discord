@@ -2,6 +2,7 @@
 
 namespace TeaDiscord;
 
+use Error;
 use Discord\Discord;
 
 /**
@@ -15,6 +16,7 @@ final class TeaDiscord
 	/**
 	 * @param \Discord\Discord
 	 */
+	private $discord;
 
 	/**
 	 * Constructor.
@@ -30,6 +32,26 @@ final class TeaDiscord
 	 */
 	public function run(): void
 	{
-		
+		try {
+
+			$this->discord->on("ready", function ($discord) {
+				printf("Bot is ready\n");
+				$discord->on("message", function ($message) use ($discord) {
+					try {
+						(new Response($discord, $message))->run();
+					} catch (Error $e) {
+						printf("\n\nAn error occured!\n");
+						var_dump($e->getMessage(), $e->getFile(), $e->getLine());		
+					}
+				});
+			});
+
+			$this->discord->run();
+
+		} catch (Error $e) {
+			printf("\n\nAn error occured!\n");
+			var_dump($e->getMessage(), $e->getFile(), $e->getLine());
+		}
+		return;	
 	}
 }

@@ -2,6 +2,8 @@
 
 declare(ticks=1);
 
+require __DIR__."/vendor/autoload.php";
+
 $writePid = file_put_contents($cfg["pid_file"], getmypid());
 
 if (!$writePid) {
@@ -84,7 +86,8 @@ function doFork(callable $callback): int
 
 init:
 $cfg["child_pid"] = doFork(function () {
-	sleep(1000);
+	$st = new TeaDiscord\TeaDiscord;
+	$st->run();
 });
 
 pcntl_signal(SIGINT, "signalHandler");
