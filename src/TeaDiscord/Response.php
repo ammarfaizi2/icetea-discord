@@ -76,7 +76,7 @@ final class Response
 				function (VoiceClient $vc) {
 					$vc->setBitrate(128000)->then(
 						function () use ($vc) {
-							$vc->playFile("/home/ammarfaizi2/project/server/104.168.127.243/app/discord2/storage/stream/mp3
+							$vc->playFile("/root/server/app/discord_/storage/stream/mp3
 ♫ Glow In The Darkness - Nightcore ♫ ( ^∇^ )-edEWLMWoEsc.mp3");
 						}
 					)->otherwise(function($e){ 
