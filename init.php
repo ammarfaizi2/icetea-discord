@@ -3,6 +3,7 @@
 declare(ticks=1);
 
 require __DIR__."/vendor/autoload.php";
+require __DIR__."/src/helpers.php";
 
 $writePid = file_put_contents($cfg["pid_file"], getmypid());
 
@@ -81,7 +82,11 @@ function signalHandler($signal, $sga): void
 function doFork(callable $callback): int
 {
 	if (!($pid = pcntl_fork())) {
-		$callback();
+		try {
+			$callback();	
+		} catch (Error $e) {
+			echo "Error: {$e->getMessage()}\n";
+		}
 		exit;
 	}
 

@@ -3,8 +3,10 @@
 namespace TeaDiscord;
 
 use Discord\Discord;
+use Discord\Parts\Guild\Guild;
 use Discord\Voice\VoiceClient;
 use Discord\Parts\Channel\Message;
+use Discord\Parts\Channel\Channel;
 
 /**
 * @author Ammar Faizi <ammarfaizi2@gmail.com> https://www.facebook.com/ammarfaizi2
@@ -34,11 +36,62 @@ final class Response
 	}
 
 	/**
+	 *
+	 * @return void
+	 */
+	private function buildGuildDir(Guild $guild): void
+	{
+		global $cfg;
+		$dir = $cfg["storage_path"]."/guild/{$guild->id}";
+		is_dir($dir) or mkdir($dir);
+		file_exists($dir."/info.json") or file_put_contents($dir."/info.json", 
+			json_encode($guild, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+	}
+
+	/**
+	 * @param \Discord\Parts\Guild\Guild $guild
+	 * @param array $param
+	 * @param string $text
+	 * @param mixed &$reply
+	 * @return void
+	 */
+	private function shmAct(Guild $guild, array $param, string $text, &$reply): bool
+	{
+		global $cfg;
+
+		$param[0] = (int) $param[0];
+
+		switch ($param[0]) {
+			case ShmAct::SELECT_STREAM_CHANNEL:
+				$shm_id = shmop_open(getMKey($guild->id, ShmKeyId::SELECT_STREAM_CHANNEL), "c", 0644, 1000);
+				$read = json_decode(mkread($shm_id, 0, 1000), true);
+				shmop_close($shm_id);
+				var_dump($read);
+				if (is_numeric($text)) {
+					$text = (int) $text;
+					var_dump($text);
+					if ($text >= 1 && $text <= count($read)) {
+						file_put_contents(
+							$cfg["storage_path"]."/guild/{$guild->id}/stream_channel",
+							$read[$text - 1]
+						);
+						$reply = "Channel `{$read[$text - 1]}` has been selected as streaming channel!";
+						return true;
+					}
+				}
+				break;
+			
+			default:
+				break;
+		}
+		return false;
+	}
+
+	/**
 	 * @return void
 	 */
 	public function run(): void
 	{
-
 		global $cfg;
 
 		$id = $this->message->id;
@@ -51,9 +104,29 @@ final class Response
 		if ((!isset($text)) || (empty($text))) {
 			return;
 		}
-
+		print "New message!\n";
 		$guild = $this->discord->guilds->get("id", $guild_id);
 		$channel = $guild->channels->get("id", $channel_id);
+		$this->buildGuildDir($guild);
+
+		$shm_id = shmop_open(getMKey($guild->id, ShmKeyId::SHM_ACT), "c", 0644, 72);
+		$read = explode("|", mkread($shm_id, 0, 72));
+
+		if (count($read) > 1) {
+			if ($this->shmAct($guild, $read, $text, $reply)) {
+				goto shm_delete_reply;
+			}
+		}
+
+		goto shm_delete_no_reply;
+
+shm_delete_reply:
+		shmop_delete($shm_id);
+		shmop_close($shm_id);
+		goto reply;
+
+shm_delete_no_reply:
+		shmop_close($shm_id);
 
 		// Shell exec.
 		if (preg_match("/^(?:\!|\/|\.|\~)(?:cx(?:[\s\n]+))(.+)$/USsi", $text, $m)) {
@@ -71,32 +144,9 @@ final class Response
 
 
 		if (preg_match("/zcc/", $text, $m)) {
-			$channel = $guild->channels->get("id", "446634690015657987");
-			$this->discord->joinVoiceChannel($channel, false, false, null)->then(
-				function (VoiceClient $vc) {
-					$vc->setBitrate(128000)->then(
-						function () use ($vc) {
-							$vc->playFile(
-								"/root/server/app/discord_/storage/stream/mp3/♫ Glow In The Darkness - Nightcore ♫ ( ^∇^ )-edEWLMWoEsc.mp3"
-							)->then(function () {
-								print "Playing...";
-							})->otherwise(function ($e) {
-								print "Error: $e";
-							});
-						}
-					)->otherwise(function($e){ 
-						printf("Error: %s\n", $e->getMessage());
-					});
-				}
-			);
-
-
-
-
+			(new Music($this->discord, $guild, $channel))->run();
 			return;
 		}
-
-
 
 
 
