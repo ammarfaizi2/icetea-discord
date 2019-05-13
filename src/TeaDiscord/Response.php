@@ -76,8 +76,13 @@ final class Response
 				function (VoiceClient $vc) {
 					$vc->setBitrate(128000)->then(
 						function () use ($vc) {
-							$vc->playFile("/root/server/app/discord_/storage/stream/mp3
-♫ Glow In The Darkness - Nightcore ♫ ( ^∇^ )-edEWLMWoEsc.mp3");
+							$vc->playFile(
+								"/root/server/app/discord_/storage/stream/mp3/♫ Glow In The Darkness - Nightcore ♫ ( ^∇^ )-edEWLMWoEsc.mp3"
+							)->then(function () {
+								print "Playing...";
+							})->otherwise(function ($e) {
+								print "Error: $e";
+							});
 						}
 					)->otherwise(function($e){ 
 						printf("Error: %s\n", $e->getMessage());
