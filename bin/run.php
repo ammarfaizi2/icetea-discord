@@ -91,7 +91,7 @@ function doFork(callable $callback): int
 
 init:
 $cfg["child_pid"] = doFork(function () {
-	cli_set_process_title("TeaDiscord --event-loop --pool");
+	cli_set_process_title("TeaDiscord --event-loop");
 	$st = new TeaDiscord\TeaDiscord;
 	$st->run();
 });

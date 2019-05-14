@@ -147,11 +147,22 @@ final class TeaStream
 
 				$guild = $this->discord->guilds->get("id", $this->guild_id);
 				$channel = $guild->channels->get("id", $this->channel_id);
+				$curChannel = $guild->channels->get("id", $this->curChannel);
+
 				$this->discord->joinVoiceChannel($channel, false, false, null)
-					->then(function (VoiceClient $vc) {
+					->then(function (VoiceClient $vc) use ($curChannel) {
+
+							$curChannel->sendMessage("Streamer has been initialized!")->then(function () {
+								dlog("Message sent!");
+							})->otherwise(function ($e) {
+								dlog("There was an error sending the message: %s\n", $e->getMessage());
+								dlog("%s\n", $e->getTraceAsString());
+							});
+
 							$this->discord->on("message", function ($message) use ($vc) {
 								$this->handleMessage($message, $vc);
 							});
+
 							$vc->setBitrate(128000)->then(
 								function () use ($vc) {
 									$vc->playFile($this->file)->then(function () {

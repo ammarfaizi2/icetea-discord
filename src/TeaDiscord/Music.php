@@ -76,6 +76,14 @@ final class Music
 	{	
 		global $cfg;
 
+
+		$this->channel->sendMessage("Initializing streamer...")->then(function () {
+			dlog("Message sent!");
+		})->otherwise(function($e) {
+			dlog("There was an error sending the message: %s\n", $e->getMessage());
+			dlog("%s\n", $e->getTraceAsString());
+		});
+
 		if (!($pid = pcntl_fork())) {
 			cli_set_process_title("stream-worker --exec-json");
 			shell_exec(
