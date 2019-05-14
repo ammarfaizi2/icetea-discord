@@ -8,7 +8,8 @@ if (isset($argv[1])) {
 	if (isset(
 		$argv["guild_id"],
 		$argv["channel_id"],
-		$argv["file"]
+		$argv["file"],
+		$argv["cur_channel"]
 	)) {
 		if (!function_exists("\\Sodium\\crypto_secretbox")) {
 			require $cfg["basepath"]."/src/sodium.php";
@@ -17,6 +18,7 @@ if (isset($argv[1])) {
 			$argv["guild_id"],
 			$argv["channel_id"],
 			$argv["file"]
+			$argv["cur_channel"]
 		))->run();
 		exit(0);
 	} else {

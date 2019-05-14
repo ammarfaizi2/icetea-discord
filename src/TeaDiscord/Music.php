@@ -86,7 +86,8 @@ final class Music
 					[
 						"guild_id" => $this->guild->id,
 						"channel_id" => file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"),
-						"file" => $cfg["storage_path"]."/stream/mp3/me.mp3"
+						"file" => $cfg["storage_path"]."/stream/mp3/me.mp3",
+						"cur_channel" => $this->channel->id
 					],
 					JSON_UNESCAPED_SLASHES
 				))
