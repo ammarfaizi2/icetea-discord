@@ -39,6 +39,14 @@ final class Queue
 	}
 
 	/**
+	 * @return array
+	 */
+	public function getAll(): array
+	{
+		return $this->queue;
+	}
+
+	/**
 	 * @param string $youtubeId
 	 * @return void
 	 */

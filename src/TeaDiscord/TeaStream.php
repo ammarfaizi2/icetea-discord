@@ -167,7 +167,7 @@ final class TeaStream
 
 							$curChannel->sendMessage("Streamer has been initialized!")->then(function () use ($curChannel) {
 								dlog("Message sent!");
-								$curChannel->sendMessage("Streaming {$this->file}...");
+								$curChannel->sendMessage("Streaming `{$this->file}`...");
 							})->otherwise(function ($e) {
 								dlog("There was an error sending the message: %s\n", $e->getMessage());
 								dlog("%s\n", $e->getTraceAsString());

@@ -181,7 +181,23 @@ shm_close_no_reply:
 			return;
 		}
 
+		if (preg_match("/^(?:\!|\/|\.|\~)queue/", $text, $m)) {
+			$queues = "";
+			foreach ((new Queue($guild->id))->getAll() as $k => $queue) {
+				$k++;
+				$queues .= "{$k}. {$queue}\n";
+			}
 
+			if ($queues === "") {
+				$reply = "There is no queue for this guild.";
+				goto reply;
+			}
+
+			foreach (str_split(str_replace("`", "\\`", $queues), 2000 - 15) as $r) {
+				$reply[] = "```text\n{$r}\n```";
+			}
+			goto reply;
+		}
 
 
 
