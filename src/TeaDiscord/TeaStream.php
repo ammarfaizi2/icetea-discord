@@ -192,16 +192,16 @@ final class TeaStream
 													$curChannel->sendMessage("Stream has finished!")->then(function () {
 														dlog("Message sent!");
 														global $cfg;
-														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 														@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 														shell_exec("/bin/kill -9 ".getmypid());
 														exit;
 													})->otherwise(function ($e) {
 														dlog("There was an error sending the message: %s\n", $e->getMessage());
 														dlog("%s\n", $e->getTraceAsString());
 														global $cfg;
-														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 														@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 														shell_exec("/bin/kill -9 ".getmypid());
 														exit;
 													});
@@ -211,8 +211,8 @@ final class TeaStream
 													dlog("There was an error closing stream the message: %s\n", $e->getMessage());
 													dlog("%s\n", $e->getTraceAsString());
 													global $cfg;
-													shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 													@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+													shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 													shell_exec("/bin/kill -9 ".getmypid());
 													exit;
 												}
@@ -221,8 +221,8 @@ final class TeaStream
 									)->otherwise(function ($e) {
 										global $cfg;
 										printf("Error: %s\n", $e->getMessage());
-										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 										@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 										shell_exec("/bin/kill -9 ".getmypid());
 										exit;
 									});
@@ -235,16 +235,16 @@ final class TeaStream
 											$curChannel->sendMessage("Stream has finished!")->then(function () {
 												dlog("Message sent!");
 												global $cfg;
-												shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 												@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+												shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 												shell_exec("/bin/kill -9 ".getmypid());
 												exit;
 											})->otherwise(function ($e) {
 												dlog("There was an error sending the message: %s\n", $e->getMessage());
 												dlog("%s\n", $e->getTraceAsString());
 												global $cfg;
-												shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 												@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+												shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 												shell_exec("/bin/kill -9 ".getmypid());
 												exit;
 											});
@@ -254,8 +254,8 @@ final class TeaStream
 											dlog("There was an error closing stream the message: %s\n", $e->getMessage());
 											dlog("%s\n", $e->getTraceAsString());
 											global $cfg;
-											shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 											@unlink($cfg["storage_path"]."/guild/{$this->guild_id}/stream_playing.lock");
+											shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 											shell_exec("/bin/kill -9 ".getmypid());
 											exit;
 										}

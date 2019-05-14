@@ -193,7 +193,6 @@ final class YoutubeStream
 							))
 						);
 					}
-					@unlink($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock");
 					exit;
 				});
 				$this->discord->run();
