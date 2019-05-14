@@ -66,7 +66,7 @@ final class Response
 			case ShmAct::SELECT_STREAM_CHANNEL:
 				$shm_id = shmop_open(getMKey($guild->id, ShmKeyId::SELECT_STREAM_CHANNEL), "c", 0644, 1000);
 
-				if ((((int)$param[3])+30) > time()) {
+				if ((((int)$param[2])+30) < time()) {
 					shmop_delete($shm_id);
 					shmop_close($shm_id);
 					return false;
@@ -145,8 +145,6 @@ shm_close_no_reply:
 		shmop_close($shm_id);
 
 
-
-
 		// Shell exec.
 		if (preg_match("/^(?:\!|\/|\.|\~)(?:cx(?:[\s\n]+))(.+)$/USsi", $text, $m)) {
 			if (in_array("{$user->id}@{$user->username}", $cfg["sudoers"])) {
@@ -162,9 +160,9 @@ shm_close_no_reply:
 		}
 
 		// Music
-		if (preg_match("/zcc/", $text, $m)) {
+		if (preg_match("/^(?:\!|\/|\.|\~)(?:ytadd(?:[\s\n]+))(.+)$/USsi", $text, $m)) {
 			try {
-				(new Music($this->discord, $guild, $channel))->run();
+				(new YoutubeStream($this->discord, $guild, $channel))->run(trim($m[1]));
 			} catch (Error $e) {
 				dlog("%s\n", $e->getTraceAsString());
 			}
