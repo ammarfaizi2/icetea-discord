@@ -10,7 +10,7 @@ if (isset($argv[1])) {
 		$argv["channel_id"],
 		$argv["file"]
 	)) {
-		(new TeaStream\TeaStream(
+		(new TeaDiscord\TeaStream(
 			$argv["guild_id"],
 			$argv["channel_id"],
 			$argv["file"]
