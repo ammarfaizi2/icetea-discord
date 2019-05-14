@@ -169,11 +169,13 @@ final class TeaStream
 										global $cfg;
 										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 										shell_exec("/bin/kill -9 ".getmypid());
+										exit;
 									})->otherwise(function ($e) {
 										global $cfg;
 										printf("Error: %s\n", $e->getMessage());
 										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 										shell_exec("/bin/kill -9 ".getmypid());
+										exit;
 									});
 								}
 							)->otherwise(function($e){ 

@@ -101,10 +101,11 @@ pcntl_signal(SIGHUP, "signalHandler");
 pcntl_signal(SIGCHLD, SIG_IGN);
 
 while (true) {
-	sleep(10000);
+	sleep(100);
 	if (isset($cfg["got_sighup"])) {
 		print "Reloading...\n";
 		unset($cfg["got_sighup"]);
 		goto init;
 	}
+	shell_exec("/bin/bash ".escapeshellarg(__DIR__."/dca_zombie.sh"));
 }
