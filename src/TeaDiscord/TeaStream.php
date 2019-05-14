@@ -87,48 +87,59 @@ final class TeaStream
 			$channel = $guild->channels->get("id", $this->curChannel);
 
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:stop)$/USsi", $text, $m)) {
-				$vc->stop()->then(function () use ($channel) {
-					dlog("Stream is stopped!");
-					$channel->sendMessage("Stream is stopped!")->then(function () {
-						dlog("Message sent!");
-					})->otherwise(function ($e) {
-						dlog("There was an error sending the message: %s\n", $e->getMessage());
-						dlog("%s\n", $e->getTraceAsString());
-					});
-				})->otherwise(function ($e) {
-					dlog("Resume stream error: %s", $e->getMessage());
-				});
+				$vc->stop()->then(
+					function () use ($channel) {
+						dlog("Stream is stopped!");
+						$channel->sendMessage("Stream is stopped!")->then(function () {
+							dlog("Message sent!");
+						})->otherwise(function ($e) {
+							dlog("There was an error sending the message: %s\n", $e->getMessage());
+							dlog("%s\n", $e->getTraceAsString());
+						});
+					}
+				)->otherwise(
+					function ($e) {
+						dlog("Resume stream error: %s", $e->getMessage());
+					}
+				);
 				return;
 			}
 
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:pause)$/USsi", $text, $m)) {
-				$vc->pause()->then(function () use ($channel) {
-					dlog("Stream is paused!");
-					$channel->sendMessage("Stream is paused!")->then(function () {
-						dlog("Message sent!");
-					})->otherwise(function ($e) {
-						dlog("There was an error sending the message: %s\n", $e->getMessage());
-						dlog("%s\n", $e->getTraceAsString());
-					});
-				})->otherwise(function ($e) {
-					dlog("Resume stream error: %s", $e->getMessage());
-
-				});;
+				$vc->pause()->then(
+					function () use ($channel) {
+						dlog("Stream is paused!");
+						$channel->sendMessage("Stream is paused!")->then(function () {
+							dlog("Message sent!");
+						})->otherwise(function ($e) {
+							dlog("There was an error sending the message: %s\n", $e->getMessage());
+							dlog("%s\n", $e->getTraceAsString());
+						});
+					}
+				)->otherwise(
+					function ($e) {
+						dlog("Resume stream error: %s", $e->getMessage());
+					}
+				);
 				return;
 			}
 
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:unpause|resume|play)$/USsi", $text, $m)) {
-				$vc->unpause()->then(function () use ($channel) {
-					dlog("Stream is resumed!");
-					$channel->sendMessage("Stream is resumed!")->then(function () {
-						dlog("Message sent!");
-					})->otherwise(function ($e) {
-						dlog("There was an error sending the message: %s\n", $e->getMessage());
-						dlog("%s\n", $e->getTraceAsString());
-					});
-				})->otherwise(function ($e) {
-					dlog("Resume stream error: %s", $e->getMessage());
-				});
+				$vc->unpause()->then(
+					function () use ($channel) {
+						dlog("Stream is resumed!");
+						$channel->sendMessage("Stream is resumed!")->then(function () {
+							dlog("Message sent!");
+						})->otherwise(function ($e) {
+							dlog("There was an error sending the message: %s\n", $e->getMessage());
+							dlog("%s\n", $e->getTraceAsString());
+						});
+					}
+				)->otherwise(
+					function ($e) {
+						dlog("Resume stream error: %s", $e->getMessage());
+					}
+				);
 				return;
 			}
 		}
@@ -165,8 +176,49 @@ final class TeaStream
 
 							$vc->setBitrate(128000)->then(
 								function () use ($vc, $curChannel) {
-									$vc->playFile($this->file)->then(function () use ($vc, $curChannel) {
-										$vc->close()->then(function () use ($curChannel) {
+									$vc->playFile($this->file)->then(
+										function () use ($vc, $curChannel) {
+											$vc->close()->then(
+												function () use ($curChannel) {
+													$curChannel->sendMessage("Stream has finished!")->then(function () {
+														dlog("Message sent!");
+														global $cfg;
+														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+														shell_exec("/bin/kill -9 ".getmypid());
+														exit;
+													})->otherwise(function ($e) {
+														dlog("There was an error sending the message: %s\n", $e->getMessage());
+														dlog("%s\n", $e->getTraceAsString());
+														global $cfg;
+														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+														shell_exec("/bin/kill -9 ".getmypid());
+														exit;
+													});
+												}
+											)->otherwise(
+												function ($e) {
+													dlog("There was an error closing stream the message: %s\n", $e->getMessage());
+													dlog("%s\n", $e->getTraceAsString());
+													global $cfg;
+													shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+													shell_exec("/bin/kill -9 ".getmypid());
+													exit;
+												}
+											);
+										}
+									)->otherwise(function ($e) {
+										global $cfg;
+										printf("Error: %s\n", $e->getMessage());
+										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+										shell_exec("/bin/kill -9 ".getmypid());
+										exit;
+									});
+								}
+							)->otherwise(
+								function($e) {
+									dlog("Error: %s\n", $e->getMessage());
+									$vc->close()->then(
+										function () use ($curChannel) {
 											$curChannel->sendMessage("Stream has finished!")->then(function () {
 												dlog("Message sent!");
 												global $cfg;
@@ -181,55 +233,19 @@ final class TeaStream
 												shell_exec("/bin/kill -9 ".getmypid());
 												exit;
 											});
-										})->otherwise(function ($e) {
+										}
+									)->otherwise(
+										function ($e) {
 											dlog("There was an error closing stream the message: %s\n", $e->getMessage());
 											dlog("%s\n", $e->getTraceAsString());
 											global $cfg;
 											shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
 											shell_exec("/bin/kill -9 ".getmypid());
 											exit;
-										});
-									})->otherwise(function ($e) {
-										global $cfg;
-										printf("Error: %s\n", $e->getMessage());
-										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-										shell_exec("/bin/kill -9 ".getmypid());
-										exit;
-									});
+										}
+									);
 								}
-							)->otherwise(function($e){ 
-								printf("Error: %s\n", $e->getMessage());
-								$vc->close()->then(function () use ($curChannel) {
-										$curChannel->sendMessage("Stream has finished!")->then(function () {
-											dlog("Message sent!");
-											global $cfg;
-											shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-											shell_exec("/bin/kill -9 ".getmypid());
-											exit;
-										})->otherwise(function ($e) {
-											dlog("There was an error sending the message: %s\n", $e->getMessage());
-											dlog("%s\n", $e->getTraceAsString());
-											global $cfg;
-											shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-											shell_exec("/bin/kill -9 ".getmypid());
-											exit;
-										});
-									})->otherwise(function ($e) {
-										dlog("There was an error closing stream the message: %s\n", $e->getMessage());
-										dlog("%s\n", $e->getTraceAsString());
-										global $cfg;
-										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-										shell_exec("/bin/kill -9 ".getmypid());
-										exit;
-									});
-								})->otherwise(function ($e) {
-									global $cfg;
-									printf("Error: %s\n", $e->getMessage());
-									shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-									shell_exec("/bin/kill -9 ".getmypid());
-									exit;
-								});
-							});
+							);
 						}
 					)
 					->otherwise(function ($e) {
