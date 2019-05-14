@@ -115,7 +115,7 @@ final class Music
 	/**
 	 * @return void
 	 */
-	private function sendChannelOption(): void
+	public function sendChannelOption(): void
 	{
 		$this->optChannel = [];
 		$reply = "**Please select a channel to stream! (in 30 seconds, reply with the number)**\n```";

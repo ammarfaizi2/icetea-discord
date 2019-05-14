@@ -164,8 +164,15 @@ shm_close_no_reply:
 			return;
 		}
 
-
-
+		// Select channel
+		if (preg_match("/^(?:\!|\/|\.|\~)(sstr)/USsi", $text, $m)) {
+			try {
+				(new Music($this->discord, $guild, $channel))->sendChannelOption();
+			} catch (Error $e) {
+				dlog("%s\n", $e->getTraceAsString());
+			}
+			return;
+		}
 
 
 
@@ -220,7 +227,7 @@ reply:
 								dlog("Message sent!");
 								$nextd($callbacks);
 							})->otherwise(function ($e) {
-								dlog("Error: %s\n", $e->getMessage());
+								dlog("Error: %s", $e->getMessage());
 							});
 						};
 						$i++;
@@ -243,8 +250,8 @@ reply:
 				$channel->sendMessage($reply)->then(function ($message) {
 					dlog("Message sent!");
 				})->otherwise(function ($e) {
-					dlog("There was an error sending the message: %s\n", $e->getMessage());
-					dlog("%s\n", $e->getTraceAsString());
+					dlog("There was an error sending the message: %s", $e->getMessage());
+					dlog("%s", $e->getTraceAsString());
 				});
 			}
 		}
