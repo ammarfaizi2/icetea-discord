@@ -14,7 +14,7 @@ use Discord\Parts\Channel\Channel;
 * @package \TeaDiscord
 * @version 0.0.1
 */
-final class Music
+final class YoutubeStream
 {
 	/**
 	 * @var \Discord\Discord
