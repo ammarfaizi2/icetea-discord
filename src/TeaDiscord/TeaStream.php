@@ -88,7 +88,8 @@ final class TeaStream
 
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:stop)$/USsi", $text, $m)) {
 				$vc->stop()->then(
-					function () use ($channel) {
+					function () use ($channel, $vc) {
+						$vc->unpause();
 						dlog("Stream is stopped!");
 						$channel->sendMessage("Stream is stopped!")->then(function () {
 							dlog("Message sent!");
