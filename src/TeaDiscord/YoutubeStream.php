@@ -73,11 +73,7 @@ final class YoutubeStream
 			if (!$this->isPlaying()) {
 				$this->doStream();
 			} else {
-				$this->channel->sendMessage("{$youtube} has been added to the queue!")->then(
-					function () {
-						$this->sendChannelOption();
-					}
-				);
+				$this->channel->sendMessage("`{$youtubeId}` has been added to the queue!");
 			}
 		} else {
 			$this->channel->sendMessage("You haven't selected the stream channel!")->then(
