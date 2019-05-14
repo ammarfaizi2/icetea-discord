@@ -113,8 +113,11 @@ final class YoutubeStream
 		}
 
 		if (isset($cached[$id])) {
+			$this->channel->sendMessage("{$id} has already been downloaded (cached content)");
 			return $cfg["storage_path"]."/stream/mp3/".$cached[$id];
 		}
+
+		$this->channel->sendMessage("Downloading {$id}...");
 
 		is_dir("/var/cache/youtube-dl") or mkdir("/var/cache/youtube-dl");
 		$fd = [
@@ -157,30 +160,49 @@ final class YoutubeStream
 
 		if (!($pid = pcntl_fork())) {
 			cli_set_process_title("stream-worker --exec-json --queue");
-			$queue = new Queue($this->guild->id);
-			file_put_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock", time());
-			while (($r = $queue->dequeue()) !== NULL) {
-				shell_exec(
-					"exec ".
-					escapeshellarg(PHP_BINARY)." ".
-					escapeshellarg($cfg["basepath"]."/bin/stream.php")." ".
-					escapeshellarg(json_encode(
-						[
-							"guild_id" => $this->guild->id,
-							"channel_id" => file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"),
-							"file" => $this->getFile($r),
-							"volume" => (
-								file_exists($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") ? 
-									(int)file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") :
-									80
-							),
-							"cur_channel" => $this->channel->id
-						],
-						JSON_UNESCAPED_SLASHES
-					))
-				);
+			$this->discord = new Discord(["token" => $cfg["discord_bot_token"]]);
+			try {
+
+				$this->discord->on("ready", function ($discord) {
+
+					$guild_id = $this->guild->id;
+					$channel_id = $this->channel->id;
+
+					$this->guild = $this->discord->guilds->get("id", $guild_id);
+					$this->channel = $this->guild->channels->get("id", $channel_id);
+
+					$queue = new Queue($this->guild->id);
+					file_put_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock", time());
+					while (($r = $queue->dequeue()) !== NULL) {
+						shell_exec(
+							"exec ".
+							escapeshellarg(PHP_BINARY)." ".
+							escapeshellarg($cfg["basepath"]."/bin/stream.php")." ".
+							escapeshellarg(json_encode(
+								[
+									"guild_id" => $this->guild->id,
+									"channel_id" => file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"),
+									"file" => $this->getFile($r),
+									"volume" => (
+										file_exists($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") ? 
+											(int)file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") :
+											80
+									),
+									"cur_channel" => $this->channel->id
+								],
+								JSON_UNESCAPED_SLASHES
+							))
+						);
+					}
+					unlink($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock");
+					exit;
+				});
+				$this->discord->run();
+
+			} catch (Error $e) {
+				printf("\n\nAn error occured!\n");
+				var_dump($e->getMessage(), $e->getFile(), $e->getLine());
 			}
-			unlink($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock");
 			exit;
 		}
 
