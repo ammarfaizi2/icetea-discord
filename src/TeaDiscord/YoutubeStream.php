@@ -72,6 +72,12 @@ final class YoutubeStream
 			unset($queue);
 			if (!$this->isPlaying()) {
 				$this->doStream();
+			} else {
+				$this->channel->sendMessage("{$youtube} has been added to the queue!")->then(
+					function () {
+						$this->sendChannelOption();
+					}
+				);
 			}
 		} else {
 			$this->channel->sendMessage("You haven't selected the stream channel!")->then(
@@ -79,7 +85,6 @@ final class YoutubeStream
 					$this->sendChannelOption();
 				}
 			);
-			
 		}
 	}
 
@@ -123,10 +128,10 @@ final class YoutubeStream
 		];
 		$ytdl = trim(shell_exec("which youtube-dl"));
 		$py = trim(shell_exec("which python"));
-		$id = escapeshellarg($id);
+		$ytid = escapeshellarg($id);
 		$proxy = "127.0.0.1:".rand(49050, 49090);
 		$me = proc_open(
-			"exec {$py} {$ytdl} -f best --proxy \"socks5://{$proxy}\" --extract-audio --audio-format mp3 {$id} --cache-dir /var/cache/youtube-dl",
+			"exec {$py} {$ytdl} -f best --proxy \"socks5://{$proxy}\" --extract-audio --audio-format mp3 {$ytid} --cache-dir /var/cache/youtube-dl",
 			$fd,
 			$pipes,
 			$cfg["storage_path"]."/stream/mp3"
@@ -157,6 +162,7 @@ final class YoutubeStream
 		if (!($pid = pcntl_fork())) {
 			cli_set_process_title("stream-worker --exec-json --queue");
 			$queue = new Queue($this->guild->id);
+			file_put_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock", time());
 			while (($r = $queue->dequeue()) !== NULL) {
 				shell_exec(
 					"exec ".
@@ -178,6 +184,7 @@ final class YoutubeStream
 					))
 				);
 			}
+			unlink($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock");
 			exit;
 		}
 
