@@ -165,8 +165,9 @@ final class TeaStream
 				$this->discord->joinVoiceChannel($channel, false, false, null)
 					->then(function (VoiceClient $vc) use ($curChannel) {
 
-							$curChannel->sendMessage("Streamer has been initialized!")->then(function () {
+							$curChannel->sendMessage("Streamer has been initialized!")->then(function () use ($curChannel) {
 								dlog("Message sent!");
+								$curChannel->sendMessage("Streaming {$this->file}...");
 							})->otherwise(function ($e) {
 								dlog("There was an error sending the message: %s\n", $e->getMessage());
 								dlog("%s\n", $e->getTraceAsString());
