@@ -60,6 +60,8 @@ final class TeaStream
 		$this->file = $file;
 		$this->curChannel = $curChannel;
 
+		define("LOG_HANDLE", fopen($cfg["storage_dir"]."/guild/{$this->guild_id}/streaming.log", "w"));
+
 		if (!file_exists($file)) {
 			throw new Exception("File: {$file} does not exists");
 		}
@@ -246,7 +248,7 @@ final class TeaStream
 						}
 					)
 					->otherwise(function ($e) {
-						printf("Error: %s\n", $e->getMessage());
+						dlog("Error: %s\n", $e->getMessage());
 					});
 			});
 

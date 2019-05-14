@@ -7,7 +7,11 @@
  */
 function dlog(string $format, ...$args): void
 {
-	printf("[%s]: %s\n",
+	if (!defined("LOG_HANDLE")) {
+		define("LOG_HANDLE", STDOUT);
+	}
+
+	fprintf(LOG_HANDLE, "[%s]: %s\n",
 		date("Y-m-d H:i:s"),
 		vsprintf($format, $args));
 }
