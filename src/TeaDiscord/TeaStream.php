@@ -166,7 +166,7 @@ final class TeaStream
 					->then(
 						function (VoiceClient $vc) use ($curChannel, $volume) {
 
-							$vc->setVolume($voume);
+							$vc->setVolume($volume);
 
 							$curChannel->sendMessage("Streamer has been initialized!")->then(function () {
 								dlog("Message sent!");
