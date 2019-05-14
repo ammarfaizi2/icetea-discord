@@ -105,7 +105,7 @@ final class Response
 		if ((!isset($text)) || (empty($text))) {
 			return;
 		}
-		print "New message!\n";
+		dlog("New message!\n");
 		$guild = $this->discord->guilds->get("id", $guild_id);
 		$channel = $guild->channels->get("id", $channel_id);
 		$this->buildGuildDir($guild);
@@ -216,12 +216,11 @@ reply:
 				foreach ($reply as $r) {
 					if ($i === 0) {
 						$callback = function (array &$callbacks) use ($channel, $r, &$nextd) {
-							print $r;
 							$channel->sendMessage($r)->then(function () use (&$callbacks, &$nextd) {
 								dlog("Message sent!");
 								$nextd($callbacks);
 							})->otherwise(function ($e) {
-								printf("Error: %s\n", $e->getMessage());
+								dlog("Error: %s\n", $e->getMessage());
 							});
 						};
 						$i++;
