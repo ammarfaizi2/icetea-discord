@@ -69,7 +69,7 @@ final class Response
 				if ((((int)$param[3])+30) > time()) {
 					shmop_delete($shm_id);
 					shmop_close($shm_id);
-					return;
+					return false;
 				}
 
 				$read = json_decode(mkread($shm_id, 0, 1000), true);
