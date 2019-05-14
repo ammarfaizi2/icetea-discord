@@ -68,7 +68,6 @@ final class Response
 				$read = json_decode(mkread($shm_id, 0, 1000), true);
 				if (is_numeric($text)) {
 					$text = (int) $text;
-					var_dump($text);
 					if ($text >= 1 && $text <= count($read)) {
 						file_put_contents(
 							$cfg["storage_path"]."/guild/{$guild->id}/stream_channel",
@@ -114,29 +113,40 @@ final class Response
 		$shm_id = shmop_open(getMKey($guild->id, ShmKeyId::SHM_ACT), "c", 0644, 72);
 		$read = explode("|", mkread($shm_id, 0, 72));
 
+		$reply = null;
+
 		if (count($read) > 1) {
 			if ($this->shmAct($guild, $read, $text, $reply)) {
 				goto shm_delete_reply;
 			}
+
+			if (is_string($reply)) {
+				goto shm_close_no_reply;
+			}
 		}
 
-		goto shm_delete_no_reply;
+		goto shm_close_no_reply;
+
 
 shm_delete_reply:
 		shmop_delete($shm_id);
 		shmop_close($shm_id);
 		goto reply;
 
-shm_delete_no_reply:
+
+shm_close_no_reply:
 		shmop_close($shm_id);
+
+
+
 
 		// Shell exec.
 		if (preg_match("/^(?:\!|\/|\.|\~)(?:cx(?:[\s\n]+))(.+)$/USsi", $text, $m)) {
 			if (in_array("{$user->id}@{$user->username}", $cfg["sudoers"])) {
 				$cmd = trim(shell_exec("/bin/bash -c ".escapeshellarg($m[1])." 2>&1"));
 				$reply = [];
-				foreach (str_split(str_replace("`", "\\`", $cmd), 2000 - 9) as $r) {
-					$reply[] = "```{$r}```";
+				foreach (str_split(str_replace("`", "\\`", $cmd), 2000 - 15) as $r) {
+					$reply[] = "```text\n{$r}\n```";
 				}
 			} else {
 				$reply = "@{$user->username}#{$user->discriminator} is not in the sudoers files. This incident will be reported.";
@@ -166,14 +176,70 @@ shm_delete_no_reply:
 reply:
 		if (isset($reply)) {
 			if (is_array($reply)) {
-				foreach ($reply as $r) {
-					$channel->sendMessage($r)->then(function ($message) {
+
+				$func = null;
+				$i = 0;
+
+				$nextd = function (array &$callbacks) use (&$nextd) {
+					if (!isset($callbacks[0])) {
+						return;
+					}
+
+					$thenCallback = function () use (&$callbacks, &$nextd, &$otherwiseCallback) {
 						dlog("Message sent!");
-					})->otherwise(function ($e) {
-						dlog("There was an error sending the message: %s\n", $e->getMessage());
-						dlog("%s\n", $e->getTraceAsString());
-					});
+						if (!isset($callbacks[1])) {
+							return;
+						}
+						$callbacks[1]()->then(function () use (&$callbacks, &$nextd) {
+							array_shift($callbacks);
+							array_shift($callbacks);
+							$nextd($callbacks);
+						})->otherwise($otherwiseCallback);
+					};
+
+					$otherwiseCallback = function ($e) use (&$callbacks, &$thenCallback) {
+						dlog("Error: %s", $msg = $e->getMessage());
+						if (preg_match("/Connection closed before receiving response/", $msg)) {
+							dlog("Retrying...");
+							$callbacks[0]()->then($thenCallback)->otherwise(function ($e) {
+								dlog("Error: %s", $msg = $e->getMessage());
+							});
+						}
+					};
+
+					usleep(100000);
+					$callbacks[0]()->then($thenCallback)->otherwise($otherwiseCallback);
+				};
+
+
+				$callbacks = [];
+				foreach ($reply as $r) {
+					if ($i === 0) {
+						$callback = function (array &$callbacks) use ($channel, $r, &$nextd) {
+							print $r;
+							$channel->sendMessage($r)->then(function () use (&$callbacks, &$nextd) {
+								dlog("Message sent!");
+								$nextd($callbacks);
+							})->otherwise(function ($e) {
+								printf("Error: %s\n", $e->getMessage());
+							});
+						};
+						$i++;
+					} else {
+						$callbacks[] = function() use ($channel, $r) {
+							return $channel->sendMessage($r);
+						};
+						$i++;
+					}
 				}
+				$callback($callbacks);
+
+				// $channel->sendMessage($r)->then(function ($message) {
+				// 	dlog("Message sent!");
+				// })->otherwise(function ($e) {
+				// 	dlog("There was an error sending the message: %s\n", $e->getMessage());
+				// 	dlog("%s\n", $e->getTraceAsString());
+				// });
 			} else {
 				$channel->sendMessage($reply)->then(function ($message) {
 					dlog("Message sent!");

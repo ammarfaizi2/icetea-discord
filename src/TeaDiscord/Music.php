@@ -54,31 +54,7 @@ final class Music
 	public function run(): void
 	{
 		if ($this->hasSelectedChannel()) {
-
-			global $cfg;
-
-			$this->discord->joinVoiceChannel(
-				$this->guild->channels->get("id", file_get_contents(
-					$cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"
-				)),
-				false, false, null
-			)->then(
-				function (VoiceClient $vc) {
-					$vc->setBitrate(128000)->then(
-						function () use ($vc) {
-							$vc->playFile(
-								__DIR__."/../../storage/stream/mp3/♫ Glow In The Darkness - Nightcore ♫ ( ^∇^ )-edEWLMWoEsc.mp3"
-							)->then(function () {
-								
-							})->otherwise(function ($e) {
-								printf("Error: %s\n", $e->getMessage());
-							});
-						}
-					)->otherwise(function($e){ 
-						printf("Error: %s\n", $e->getMessage());
-					});
-				}
-			);
+			$this->doStream();
 		} else {
 			$this->sendChannelOption();
 		}
@@ -91,6 +67,33 @@ final class Music
 	{
 		global $cfg;
 		return file_exists($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel");
+	}
+
+	/**
+	 * @return int
+	 */
+	private function doStream(): int
+	{	
+		global $cfg;
+
+		if (!($pid = pcntl_fork())) {
+			
+			shell_exec(
+				"exec ".
+				escapeshellarg(PHP_BINARY)." ".
+				escapeshellarg($cfg["basepath"]."/bin/stream.php")." ".
+				escapeshellarg(json_encode(
+					[
+						"guild_id" => $this->guild->id,
+						"channel_id" => file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"),
+						"file" => $cfg["storage_path"]."/stream/mp3/me.mp3"
+					],
+					JSON_UNESCAPED_SLASHES
+				))
+			);
+
+			exit;
+		}
 	}
 
 	/**
