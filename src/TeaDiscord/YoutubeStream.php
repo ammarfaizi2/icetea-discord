@@ -98,6 +98,14 @@ final class YoutubeStream
 	 */
 	private function getFile(string $id): string
 	{
+		global $cfg;
+
+		$this->discord = new Discord(["token" => $cfg["discord_bot_token"]]);
+		$channel_id = $this->channel->id;
+		$guild_id = $this->guild->id;
+		$this->guild = $this->discord->guilds->get("id", $guild_id);
+		$this->channel = $this->guild->channels->get("id", $channel_id);
+
 		$this->channel->sendMessage("Downloading {$id}...")->then(function () {
 			dlog("Message sent!");
 		})->otherwise(function($e) {
@@ -105,7 +113,6 @@ final class YoutubeStream
 			dlog("%s\n", $e->getTraceAsString());
 		});
 
-		global $cfg;
 		$cacheFile = $cfg["storage_path"]."/stream/mp3/cache.json";
 
 		$cached = [];
@@ -140,7 +147,7 @@ final class YoutubeStream
 		if (preg_match("/\[ffmpeg\] Destination: (.*.mp3)/Usi", stream_get_contents($pipes[1]), $m)) {
 			$cached[$id] = $m[1];
 			file_put_contents($cacheFile, json_encode($cached, JSON_UNESCAPED_SLASHES));
-			return $cached[$id];
+			return $cfg["storage_path"]."/stream/mp3/".$cached[$id];
 		}
 		proc_close($me);
 		return false;
