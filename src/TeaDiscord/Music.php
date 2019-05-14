@@ -95,7 +95,11 @@ final class Music
 						"guild_id" => $this->guild->id,
 						"channel_id" => file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"),
 						"file" => $cfg["storage_path"]."/stream/mp3/me.mp3",
-						"volume" => ((int)file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume")),
+						"volume" => (
+							file_exists($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") ?
+								(int)file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") :
+								80
+						),
 						"cur_channel" => $this->channel->id
 					],
 					JSON_UNESCAPED_SLASHES
