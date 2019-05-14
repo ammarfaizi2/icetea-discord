@@ -164,6 +164,7 @@ shm_close_no_reply:
 			try {
 				(new YoutubeStream($this->discord, $guild, $channel))->run(trim($m[1]));
 			} catch (Error $e) {
+				dlog("%s\n", $e->getMessage());
 				dlog("%s\n", $e->getTraceAsString());
 			}
 			return;
@@ -174,6 +175,7 @@ shm_close_no_reply:
 			try {
 				(new Music($this->discord, $guild, $channel))->sendChannelOption();
 			} catch (Error $e) {
+				dlog("%s\n", $e->getMessage());
 				dlog("%s\n", $e->getTraceAsString());
 			}
 			return;
