@@ -207,7 +207,7 @@ reply:
 						}
 					};
 
-					usleep(100000);
+					usleep(500000);
 					$callbacks[0]()->then($thenCallback)->otherwise($otherwiseCallback);
 				};
 
