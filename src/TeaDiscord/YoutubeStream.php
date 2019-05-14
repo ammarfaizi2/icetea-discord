@@ -100,19 +100,6 @@ final class YoutubeStream
 	{
 		global $cfg;
 
-		$this->discord = new Discord(["token" => $cfg["discord_bot_token"]]);
-		$channel_id = $this->channel->id;
-		$guild_id = $this->guild->id;
-		$this->guild = $this->discord->guilds->get("id", $guild_id);
-		$this->channel = $this->guild->channels->get("id", $channel_id);
-
-		$this->channel->sendMessage("Downloading {$id}...")->then(function () {
-			dlog("Message sent!");
-		})->otherwise(function($e) {
-			dlog("There was an error sending the message: %s\n", $e->getMessage());
-			dlog("%s\n", $e->getTraceAsString());
-		});
-
 		$cacheFile = $cfg["storage_path"]."/stream/mp3/cache.json";
 
 		$cached = [];
