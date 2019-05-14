@@ -96,7 +96,7 @@ final class Music
 						"channel_id" => file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_channel"),
 						"file" => $cfg["storage_path"]."/stream/mp3/me.mp3",
 						"volume" => (
-							file_exists($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") ?
+							file_exists($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") ? 
 								(int)file_get_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_volume") :
 								80
 						),

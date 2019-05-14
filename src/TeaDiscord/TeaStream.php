@@ -60,8 +60,6 @@ final class TeaStream
 		$this->file = $file;
 		$this->curChannel = $curChannel;
 
-		define("LOG_HANDLE", fopen($cfg["storage_path"]."/guild/{$this->guild_id}/streaming.log", "w"));
-
 		if (!file_exists($file)) {
 			throw new Exception("File: {$file} does not exists");
 		}
@@ -149,23 +147,22 @@ final class TeaStream
 	}
 
 	/**
-	 * @param int $volume
 	 * @return void
 	 */
-	public function run(int $volume): void
+	public function run(): void
 	{
 		global $cfg;
 		try {
 
-			$this->discord->on("ready", function ($discord, $volume) {
+			$this->discord->on("ready", function ($discord) {
 
 				$guild = $this->discord->guilds->get("id", $this->guild_id);
 				$channel = $guild->channels->get("id", $this->channel_id);
 				$curChannel = $guild->channels->get("id", $this->curChannel);
 
 				$this->discord->joinVoiceChannel($channel, false, false, null)
-					->then(
-						function (VoiceClient $vc) use ($curChannel, $volume) {
+					->then(function (VoiceClient $vc) use ($curChannel) {
+
 							$curChannel->sendMessage("Streamer has been initialized!")->then(function () {
 								dlog("Message sent!");
 							})->otherwise(function ($e) {
@@ -177,78 +174,82 @@ final class TeaStream
 								$this->handleMessage($message, $vc);
 							});
 
-							// $vc->setVolume($volume)->then(
-							// 	function () use ($vc, $curChannel) {
-							// 		$vc->setBitrate(128000)->then(
-							// 			function () use ($vc, $curChannel) {
-							// 				$vc->playFile($this->file)->then(
-							// 					function () use ($vc, $curChannel) {
-							// 						$vc->close()->then(
-							// 							function () use ($curChannel) {
-							// 								$curChannel->sendMessage("Stream has finished!")->then(function () {
-							// 									dlog("Message sent!");
-							// 									global $cfg;
-							// 									shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-							// 									shell_exec("/bin/kill -9 ".getmypid());
-							// 									exit;
-							// 								})->otherwise(function ($e) {
-							// 									dlog("There was an error sending the message: %s\n", $e->getMessage());
-							// 									dlog("%s\n", $e->getTraceAsString());
-							// 									global $cfg;
-							// 									shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-							// 									shell_exec("/bin/kill -9 ".getmypid());
-							// 									exit;
-							// 								});
-							// 							}
-							// 						)->otherwise(
-							// 							function ($e) {
-							// 								dlog("There was an error closing stream the message: %s\n", $e->getMessage());
-							// 								dlog("%s\n", $e->getTraceAsString());
-							// 								global $cfg;
-							// 								shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-							// 								shell_exec("/bin/kill -9 ".getmypid());
-							// 								exit;
-							// 							}
-							// 						);
-							// 					}
-							// 				)->otherwise(
-							// 					function ($e) {
-							// 						global $cfg;
-							// 						printf("Error: %s\n", $e->getMessage());
-							// 						shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-							// 						shell_exec("/bin/kill -9 ".getmypid());
-							// 						exit;
-							// 					}
-							// 				);
-							// 			}
-							// 		)->otherwise(
-							// 			function($e) {
-							// 				dlog("Error: %s\n", $e->getMessage());
-							// 				$vc->close()->then(
-							// 					function () use ($curChannel) {
-							// 						global $cfg;
-							// 						shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-							// 						shell_exec("/bin/kill -9 ".getmypid());
-							// 						exit;
-							// 					}
-							// 				)->otherwise(
-							// 					function ($e) {
-							// 						dlog("There was an error closing stream the message: %s\n", $e->getMessage());
-							// 						dlog("%s\n", $e->getTraceAsString());
-							// 						global $cfg;
-							// 						shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
-							// 						shell_exec("/bin/kill -9 ".getmypid());
-							// 						exit;
-							// 					}
-							// 				);
-							// 			}
-							// 		);
-							// 	}
-							// );
+							$vc->setBitrate(128000)->then(
+								function () use ($vc, $curChannel) {
+									$vc->playFile($this->file)->then(
+										function () use ($vc, $curChannel) {
+											$vc->close()->then(
+												function () use ($curChannel) {
+													$curChannel->sendMessage("Stream has finished!")->then(function () {
+														dlog("Message sent!");
+														global $cfg;
+														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+														shell_exec("/bin/kill -9 ".getmypid());
+														exit;
+													})->otherwise(function ($e) {
+														dlog("There was an error sending the message: %s\n", $e->getMessage());
+														dlog("%s\n", $e->getTraceAsString());
+														global $cfg;
+														shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+														shell_exec("/bin/kill -9 ".getmypid());
+														exit;
+													});
+												}
+											)->otherwise(
+												function ($e) {
+													dlog("There was an error closing stream the message: %s\n", $e->getMessage());
+													dlog("%s\n", $e->getTraceAsString());
+													global $cfg;
+													shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+													shell_exec("/bin/kill -9 ".getmypid());
+													exit;
+												}
+											);
+										}
+									)->otherwise(function ($e) {
+										global $cfg;
+										printf("Error: %s\n", $e->getMessage());
+										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+										shell_exec("/bin/kill -9 ".getmypid());
+										exit;
+									});
+								}
+							)->otherwise(
+								function($e) {
+									dlog("Error: %s\n", $e->getMessage());
+									$vc->close()->then(
+										function () use ($curChannel) {
+											$curChannel->sendMessage("Stream has finished!")->then(function () {
+												dlog("Message sent!");
+												global $cfg;
+												shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+												shell_exec("/bin/kill -9 ".getmypid());
+												exit;
+											})->otherwise(function ($e) {
+												dlog("There was an error sending the message: %s\n", $e->getMessage());
+												dlog("%s\n", $e->getTraceAsString());
+												global $cfg;
+												shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+												shell_exec("/bin/kill -9 ".getmypid());
+												exit;
+											});
+										}
+									)->otherwise(
+										function ($e) {
+											dlog("There was an error closing stream the message: %s\n", $e->getMessage());
+											dlog("%s\n", $e->getTraceAsString());
+											global $cfg;
+											shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+											shell_exec("/bin/kill -9 ".getmypid());
+											exit;
+										}
+									);
+								}
+							);
 						}
 					)
 					->otherwise(function ($e) {
-						dlog("Error: %s\n", $e->getMessage());
+						printf("Error: %s\n", $e->getMessage());
 					});
 			});
 
