@@ -65,6 +65,13 @@ final class Response
 		switch ($param[0]) {
 			case ShmAct::SELECT_STREAM_CHANNEL:
 				$shm_id = shmop_open(getMKey($guild->id, ShmKeyId::SELECT_STREAM_CHANNEL), "c", 0644, 1000);
+
+				if ((((int)$param[3])+30) > time()) {
+					shmop_delete($shm_id);
+					shmop_close($shm_id);
+					return;
+				}
+
 				$read = json_decode(mkread($shm_id, 0, 1000), true);
 				if (is_numeric($text)) {
 					$text = (int) $text;
