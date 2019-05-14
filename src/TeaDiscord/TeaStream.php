@@ -175,7 +175,7 @@ final class TeaStream
 								$this->handleMessage($message, $vc);
 							});
 
-							$vc->setVolume()->then(
+							$vc->setVolume($volume)->then(
 								function () {
 									$vc->setBitrate(128000)->then(
 										function () use ($vc, $curChannel) {
