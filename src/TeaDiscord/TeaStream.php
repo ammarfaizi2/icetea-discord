@@ -52,8 +52,9 @@ final class TeaStream
 
 				$guild = $this->discord->guilds->get("id", $this->guild_id);
 				$channel = $guild->channels->get("id", $this->channel_id);
-				$this->discord->joinVoiceChannel($channel, false, false, null)->then(
-					function (VoiceClient $vc) {
+				$this->discord->joinVoiceChannel(
+					$channel, false, false, null)
+				->then(function (VoiceClient $vc) {
 						$vc->setBitrate(128000)->then(
 							function () use ($vc) {
 								$vc->playFile($this->file)->then(function () {
@@ -66,7 +67,9 @@ final class TeaStream
 							printf("Error: %s\n", $e->getMessage());
 						});
 					}
-				);
+				)->otherwise(function ($e) {
+					printf("Error: %s\n", $e->getMessage());
+				});
 
 			});
 
