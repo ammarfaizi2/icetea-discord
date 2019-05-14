@@ -12,7 +12,7 @@ use Discord\Discord;
  * @package \TeaDiscord
  * @version 0.0.1
  */
-final class TeaDiscord
+final class TeaStream
 {
 	/**
 	 * @param \Discord\Discord
