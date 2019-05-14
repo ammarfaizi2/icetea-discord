@@ -65,7 +65,7 @@ final class YoutubeStream
 	{
 		if ($this->hasSelectedChannel()) {
 			if (!filter_var($youtubeId, FILTER_VALIDATE_URL)) {
-				$youtubeId = "https://www.youtube.com/watch?w={$youtubeId}";
+				$youtubeId = "https://www.youtube.com/watch?v={$youtubeId}";
 			}
 			$queue = new Queue($this->guild->id);
 			$queue->enqueue($youtubeId);
@@ -101,6 +101,7 @@ final class YoutubeStream
 		global $cfg;
 		$cacheFile = $cfg["storage_path"]."/storage/stream/mp3/cache.json";
 
+		$cached = [];
 		if (file_exists($cacheFile)) {
 			$cached = json_decode(file_get_contents($cacheFile), true);
 		}
