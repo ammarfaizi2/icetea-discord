@@ -162,8 +162,8 @@ final class TeaStream
 				$curChannel = $guild->channels->get("id", $this->curChannel);
 
 				$this->discord->joinVoiceChannel($channel, false, false, null)
-					->then(function (VoiceClient $vc) use ($curChannel, $volume) {
-
+					->then(
+						function (VoiceClient $vc) use ($curChannel, $volume) {
 							$curChannel->sendMessage("Streamer has been initialized!")->then(function () {
 								dlog("Message sent!");
 							})->otherwise(function ($e) {
@@ -176,7 +176,7 @@ final class TeaStream
 							});
 
 							$vc->setVolume($volume)->then(
-								function () {
+								function () use ($vc, $curChannel) {
 									$vc->setBitrate(128000)->then(
 										function () use ($vc, $curChannel) {
 											$vc->playFile($this->file)->then(
