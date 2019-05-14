@@ -172,7 +172,6 @@ final class YoutubeStream
 					$this->channel = $this->guild->channels->get("id", $channel_id);
 
 					$queue = new Queue($this->guild->id);
-					file_put_contents($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock", time());
 					while (($r = $queue->dequeue()) !== NULL) {
 						shell_exec(
 							"exec ".
@@ -194,7 +193,7 @@ final class YoutubeStream
 							))
 						);
 					}
-					unlink($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock");
+					@unlink($cfg["storage_path"]."/guild/{$this->guild->id}/stream_playing.lock");
 					exit;
 				});
 				$this->discord->run();

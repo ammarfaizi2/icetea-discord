@@ -199,7 +199,9 @@ shm_close_no_reply:
 			goto reply;
 		}
 
-
+		if (preg_match("/^(?:\!|\/|\.|\~)rlock/", $text, $m)) {
+			$guild->id
+		}
 
 
 
