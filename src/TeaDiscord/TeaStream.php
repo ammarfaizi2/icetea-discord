@@ -65,11 +65,49 @@ final class TeaStream
 	}
 
 	/**
-	 *
-	 *
+	 * @param \Discord\Parts\Channel\Message $message
+	 * @param \Discord\Voice\VoiceClient     $vc
+	 * @return void
 	 */
-	private function handleMessage()
+	private function handleMessage(Message $message, VoiceClient $vc): void
 	{
+		global $cfg;
+
+		$id = $message->id;
+		$guild_id = $message->channel->guild_id;
+		$channel_id = $message->channel_id;
+		$text = $message->content;
+		$type = $message->type;
+		$user = $message->author->user;
+
+		if (($guild_id === $this->guild_id) && ($channel_id === $this->curChannel)) {
+			if (preg_match("/^(?:\!|\/|\.|\~)(?:stop)$/USsi", $text, $m)) {
+				$vc->stop()->then(function () {
+					dlog("Stream is stopped!");
+				})->otherwise(function ($e) {
+					dlog("Resume stream error: %s", $e->getMessage());
+				});
+				return;
+			}
+
+			if (preg_match("/^(?:\!|\/|\.|\~)(?:pause)$/USsi", $text, $m)) {
+				$vc->pause()->then(function () {
+					dlog("Stream is paused!");
+				})->otherwise(function ($e) {
+					dlog("Resume stream error: %s", $e->getMessage());
+				});;
+				return;
+			}
+
+			if (preg_match("/^(?:\!|\/|\.|\~)(?:unpause|resume)$/USsi", $text, $m)) {
+				$vc->unpause()->then(function () {
+					dlog("Stream is continued!");
+				})->otherwise(function ($e) {
+					dlog("Resume stream error: %s", $e->getMessage());
+				});
+				return;
+			}
+		}
 
 	}
 
