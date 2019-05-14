@@ -7,10 +7,6 @@ require __DIR__."/../init.php";
 
 $writePid = file_put_contents($cfg["pid_file"], getmypid());
 
-if (!function_exists("\\Sodium\\crypto_secretbox")) {
-	require $cfg["basepath"]."/src/sodium.php";
-}
-
 if (!$writePid) {
 	print "Couldn't create a pid file!\n";
 	exit(1);

@@ -10,6 +10,9 @@ if (isset($argv[1])) {
 		$argv["channel_id"],
 		$argv["file"]
 	)) {
+		if (!function_exists("\\Sodium\\crypto_secretbox")) {
+			require $cfg["basepath"]."/src/sodium.php";
+		}
 		(new TeaDiscord\TeaStream(
 			$argv["guild_id"],
 			$argv["channel_id"],
