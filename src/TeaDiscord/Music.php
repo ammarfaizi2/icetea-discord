@@ -94,6 +94,8 @@ final class Music
 
 			exit;
 		}
+
+		return $pid;
 	}
 
 	/**

@@ -157,7 +157,7 @@ shm_close_no_reply:
 		// Music
 		if (preg_match("/zcc/", $text, $m)) {
 			try {
-				(new Music($this->discord, $guild, $channel))->run();	
+				(new Music($this->discord, $guild, $channel))->run();
 			} catch (Error $e) {
 				dlog("%s\n", $e->getTraceAsString());
 			}
