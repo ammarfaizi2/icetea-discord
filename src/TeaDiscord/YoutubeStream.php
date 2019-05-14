@@ -98,6 +98,13 @@ final class YoutubeStream
 	 */
 	private function getFile(string $id): string
 	{
+		$this->channel->sendMessage("Downloading {$id}...")->then(function () {
+			dlog("Message sent!");
+		})->otherwise(function($e) {
+			dlog("There was an error sending the message: %s\n", $e->getMessage());
+			dlog("%s\n", $e->getTraceAsString());
+		});
+
 		global $cfg;
 		$cacheFile = $cfg["storage_path"]."/storage/stream/mp3/cache.json";
 
