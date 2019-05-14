@@ -17,7 +17,7 @@ if (isset($argv[1])) {
 		(new TeaDiscord\TeaStream(
 			$argv["guild_id"],
 			$argv["channel_id"],
-			$argv["file"]
+			$argv["file"],
 			$argv["cur_channel"]
 		))->run();
 		exit(0);
