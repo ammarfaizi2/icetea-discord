@@ -148,25 +148,21 @@ final class TeaStream
 	}
 
 	/**
-	 * @param int $volume
 	 * @return void
 	 */
-	public function run(int $volume): void
+	public function run(): void
 	{
 		global $cfg;
 		try {
 
-			$this->discord->on("ready", function ($discord, $volume) {
+			$this->discord->on("ready", function ($discord) {
 
 				$guild = $this->discord->guilds->get("id", $this->guild_id);
 				$channel = $guild->channels->get("id", $this->channel_id);
 				$curChannel = $guild->channels->get("id", $this->curChannel);
 
 				$this->discord->joinVoiceChannel($channel, false, false, null)
-					->then(
-						function (VoiceClient $vc) use ($curChannel, $volume) {
-
-							// $vc->setVolume($volume);
+					->then(function (VoiceClient $vc) use ($curChannel) {
 
 							$curChannel->sendMessage("Streamer has been initialized!")->then(function () {
 								dlog("Message sent!");
