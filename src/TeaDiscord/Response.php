@@ -200,7 +200,12 @@ shm_close_no_reply:
 		}
 
 		if (preg_match("/^(?:\!|\/|\.|\~)rlock/", $text, $m)) {
-			$guild->id
+			if (@unlink($cfg["storage_path"]."/guild/{$guild->id}/stream_playing.lock")) {
+				$reply = "Lock file has been deleted successfully!";
+			} else {
+				$reply = "Lock file couldn't be deleted, it might have deleted before.";
+			}
+			goto reply;
 		}
 
 
