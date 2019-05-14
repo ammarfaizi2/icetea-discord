@@ -7,6 +7,7 @@ use Exception;
 use Discord\Discord;
 use Discord\Voice\VoiceClient;
 use Discord\Parts\Channel\Message;
+use Discord\Parts\Channel\Channel;
 
 /**
  * @author Ammar Faizi <ammarfaizi2@gmail.com> https://www.facebook.com/ammarfaizi2
@@ -81,9 +82,19 @@ final class TeaStream
 		$user = $message->author->user;
 
 		if (($guild_id === $this->guild_id) && ($channel_id === $this->curChannel)) {
+
+			$guild = $this->discord->guilds->get("id", $this->guild_id);
+			$channel = $guild->channels->get("id", $this->curChannel);
+
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:stop)$/USsi", $text, $m)) {
-				$vc->stop()->then(function () {
+				$vc->stop()->then(function () use ($channel) {
 					dlog("Stream is stopped!");
+					$channel->sendMessage("Stream is stopped!")->then(function () {
+						dlog("Message sent!");
+					})->otherwise(function ($e) {
+						dlog("There was an error sending the message: %s\n", $e->getMessage());
+						dlog("%s\n", $e->getTraceAsString());
+					});
 				})->otherwise(function ($e) {
 					dlog("Resume stream error: %s", $e->getMessage());
 				});
@@ -91,17 +102,30 @@ final class TeaStream
 			}
 
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:pause)$/USsi", $text, $m)) {
-				$vc->pause()->then(function () {
+				$vc->pause()->then(function () use ($channel) {
 					dlog("Stream is paused!");
+					$channel->sendMessage("Stream is paused!")->then(function () {
+						dlog("Message sent!");
+					})->otherwise(function ($e) {
+						dlog("There was an error sending the message: %s\n", $e->getMessage());
+						dlog("%s\n", $e->getTraceAsString());
+					});
 				})->otherwise(function ($e) {
 					dlog("Resume stream error: %s", $e->getMessage());
+
 				});;
 				return;
 			}
 
 			if (preg_match("/^(?:\!|\/|\.|\~)(?:unpause|resume)$/USsi", $text, $m)) {
-				$vc->unpause()->then(function () {
-					dlog("Stream is continued!");
+				$vc->unpause()->then(function () use ($channel) {
+					dlog("Stream is resumed!");
+					$channel->sendMessage("Stream is resumed!")->then(function () {
+						dlog("Message sent!");
+					})->otherwise(function ($e) {
+						dlog("There was an error sending the message: %s\n", $e->getMessage());
+						dlog("%s\n", $e->getTraceAsString());
+					});
 				})->otherwise(function ($e) {
 					dlog("Resume stream error: %s", $e->getMessage());
 				});
@@ -133,9 +157,11 @@ final class TeaStream
 									$vc->playFile($this->file)->then(function () {
 										global $cfg;
 										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+										shell_exec("/bin/kill -9 ".getmypid());
 									})->otherwise(function ($e) {
 										printf("Error: %s\n", $e->getMessage());
 										shell_exec("/bin/sh ".escapeshellarg($cfg["basepath"]."/bin/kill_dca.sh"));
+										shell_exec("/bin/kill -9 ".getmypid());
 									});
 								}
 							)->otherwise(function($e){ 
