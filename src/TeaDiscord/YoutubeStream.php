@@ -164,7 +164,7 @@ final class YoutubeStream
 			try {
 
 				$this->discord->on("ready", function ($discord) {
-
+					global $cfg;
 					$guild_id = $this->guild->id;
 					$channel_id = $this->channel->id;
 
