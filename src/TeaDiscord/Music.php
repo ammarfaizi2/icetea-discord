@@ -77,7 +77,7 @@ final class Music
 		global $cfg;
 
 		if (!($pid = pcntl_fork())) {
-			
+			cli_set_process_title("stream-worker --exec-json");
 			shell_exec(
 				"exec ".
 				escapeshellarg(PHP_BINARY)." ".

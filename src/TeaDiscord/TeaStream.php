@@ -5,6 +5,7 @@ namespace TeaDiscord;
 use Error;
 use Exception;
 use Discord\Discord;
+use Discord\Voice\VoiceClient;
 
 /**
  * @author Ammar Faizi <ammarfaizi2@gmail.com> https://www.facebook.com/ammarfaizi2
