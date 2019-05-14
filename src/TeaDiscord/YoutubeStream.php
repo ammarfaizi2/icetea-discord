@@ -106,7 +106,7 @@ final class YoutubeStream
 		});
 
 		global $cfg;
-		$cacheFile = $cfg["storage_path"]."/storage/stream/mp3/cache.json";
+		$cacheFile = $cfg["storage_path"]."/stream/mp3/cache.json";
 
 		$cached = [];
 		if (file_exists($cacheFile)) {
