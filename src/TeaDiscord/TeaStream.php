@@ -53,13 +53,14 @@ final class TeaStream
 	 */
 	public function __construct(string $guild_id, string $channel_id, string $file, string $curChannel)
 	{
+		global $cfg;
+
 		file_put_contents($cfg["storage_path"]."/guild/{$guild_id}/stream_playing.lock", time());
 		register_shutdown_function(function () use ($guild_id) {
 			global $cfg;
 			@unlink($cfg["storage_path"]."/guild/{$guild_id}/stream_playing.lock");
 		});
 
-		global $cfg;
 		$this->discord = new Discord(["token" => $cfg["discord_bot_token"]]);
 		$this->guild_id = $guild_id;
 		$this->channel_id = $channel_id;
