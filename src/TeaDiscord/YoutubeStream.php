@@ -67,7 +67,7 @@ final class YoutubeStream
 			if (!filter_var($youtubeId, FILTER_VALIDATE_URL)) {
 				$youtubeId = "https://www.youtube.com/watch?w={$youtubeId}";
 			}
-			$queue = new Queue($this->guild_id);
+			$queue = new Queue($this->guild->id);
 			$queue->enqueue($youtubeId);
 			unset($queue);
 			if (!$this->isPlaying()) {
@@ -154,7 +154,7 @@ final class YoutubeStream
 
 		if (!($pid = pcntl_fork())) {
 			cli_set_process_title("stream-worker --exec-json --queue");
-			$queue = new Queue($this->guild_id);
+			$queue = new Queue($this->guild->id);
 			while (($r = $queue->dequeue()) !== NULL) {
 				shell_exec(
 					"exec ".
