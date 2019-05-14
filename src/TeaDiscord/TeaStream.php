@@ -124,7 +124,7 @@ final class TeaStream
 				$guild = $this->discord->guilds->get("id", $this->guild_id);
 				$channel = $guild->channels->get("id", $this->channel_id);
 				$this->discord->joinVoiceChannel($channel, false, false, null)
-					->then(function (VoiceClient $vc) use () {
+					->then(function (VoiceClient $vc) {
 							$this->discord->on("message", function ($message) use ($vc) {
 								$this->handleMessage($message, $vc);
 							});
