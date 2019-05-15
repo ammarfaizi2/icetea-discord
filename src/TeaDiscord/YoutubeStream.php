@@ -74,6 +74,10 @@ final class YoutubeStream
 				$this->doStream();
 			} else {
 				$this->channel->sendMessage("`{$youtubeId}` has been added to the queue!");
+				if (!pcntl_fork()) {
+					$this->getFile($youtubeId);
+					exit;
+				}
 			}
 		} else {
 			$this->channel->sendMessage("You haven't selected the stream channel!")->then(
